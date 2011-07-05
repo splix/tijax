@@ -52,7 +52,46 @@ var TijaxCore = function() {
             Ti.API.error("fail. Response: " + http.responseText);
         };
 
+        this.configure = function(conf) {
+            var self = this;
+            if (typeof(conf.timeout) != 'number') {
+                conf.timeout = 10000;
+            }
+            if (typeof(conf.error) != 'function') {
+                conf.error = function() {
+                    self.logState();
+                }
+            }
+            if (typeof(conf.complete) != 'function') {
+                conf.complete = function() {
+                }
+            }
+            if (typeof(conf.onload) != 'function') {
+                conf.onload = function() {
+                    var http = self._conn;
+                    var json = null;
+                    if (http.responseText != null && http.responseText.length > 0) {
+                        json = eval('(' + http.responseText + ')');
+                    }
+                    conf.success(json, self.textStatus(http.status), http);
+                    conf.complete(http, self.textStatus(http.status));
+                }
+            } else {
+                conf._onload = conf.onload;
+                conf.onload = function() {
+                    conf._onload(http);
+                }
+            }
+            if (typeof(conf.onsendstream) != 'function') {
+                conf.onsendstream = function(e) {
+                    Ti.API.debug('Upload progress: ' + e.progress);
+                }
+            }
+            return conf;
+        };
+
         this.ajax = function(conf) {
+            conf = this.configure(conf);
             if (conf.type == 'GET' && this.length(conf.data) > 0) {
                 if (conf.url.indexOf('?') >= 0) {
                     conf.url = conf.url + '&';
@@ -60,49 +99,17 @@ var TijaxCore = function() {
                     conf.url = conf.url + '?';
                 }
                 conf.url = conf.url + this.params(conf.data);
-                Ti.API.debug("new url: ", conf.url);
             }
             var http = Ti.Network.createHTTPClient();
             this._conn = http;
-            var self = this;
 
-            if (typeof(conf.timeout) == 'number') {
-                http.timeout = conf.timeout;
-            } else {
-                http.timeout = 10000;
-            }
-
+            http.timeout = conf.timeout;
             http.onerror = function() {
-                self.logState();
-                if (typeof(conf.error) == 'function') {
-                    conf.error(http, http.status, http.responseText);
-                }
-                if (typeof(conf.complete) == 'function') {
-                    conf.complete(http, 'error');
-                }
+                conf.error(http, http.status, http.responseText);
+                conf.complete(http, 'error');
             };
-
-            if (typeof(conf.onload) == 'function') {
-                //used for manual response processing (see .download() method)
-                http.onload = function() {
-                    conf.onload(http);
-                }
-            } else {
-                http.onload = function() {
-                    if (typeof(conf.success) == 'function') {
-                        var json = JSON.parse(http.responseText);
-                        conf.success(json, self.textStatus(http.status), http);
-                    }
-                    if (typeof(conf.complete) == 'function') {
-                        conf.complete(http, self.textStatus(http.status));
-                    }
-                    return true;
-                }
-            }
-
-            http.onsendstream = function(e) {
-                Ti.API.debug('Upload progress: ' + e.progress);
-            };
+            http.onload = conf.onload;
+            http.onsendstream = conf.onsendstream;
 
             http.open(conf.type, conf.url);
             if (typeof(conf.headers) == 'object') {
