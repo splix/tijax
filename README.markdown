@@ -22,13 +22,13 @@ Tijax.get({
         param1: 'value',
         param2: 'value'
     },
-    success: function(data) {
+    success: function(data, status, http) {
         Ti.API.info('Got it ' + JSON.stringify(data));
     },
-    error: function() {
+    error: function(http, status) {
         error('Failed');
     },
-    complete: function() {
+    complete: function(http, status) {
         info('Complete');
     }
 });
@@ -46,7 +46,7 @@ Tijax.download({
     url: 'http://example.com/test.jpg',
     file: targetFile,
     success: function() {
-        Ti.API.debug("Image from " + url + " have downloaded into " + targetFile.nativePath);
+        Ti.API.debug("Image have downloaded into " + targetFile.nativePath);
     }
 });
 ```
@@ -65,10 +65,18 @@ Options:
 
  * url - url for request
  * data - data to be sent (map of strings)
+ * timeout - time in millisecond (default is 10000 = 10 seconds)
  * headers - headers for request (map of strings)
- * success - a function to be called if the request successed. Arguments: `data` - map, parsed JSON response
- * error - a function to be called if the request failed
- * complete - a function to be called when the request finished (after success and error callbacks are executed)
+ * success - a function to be called if the request successed. Arguments:
+   * `data` - map, parsed JSON response
+   * `status` - string (always 'success' for this event)
+   * `http` - used Ti.Network.HTTPClient
+ * error - a function to be called if the request failed. Arguments:
+   * `http` - used Ti.Network.HTTPClient
+   * `status` - string (currently always 'error' for this event)
+ * complete - a function to be called when the request finished (after success and error callbacks are executed). Arguments:
+   * `http` - used Ti.Network.HTTPClient
+   * `status` - status of request, can be: 'error', 'success'
 
 License
 -------
