@@ -37,6 +37,21 @@ var TijaxCore = function() {
             return size;
         };
 
+        this.textStatus = function(statusCode) {
+            if (statusCode == 200) {
+                return 'success'
+            }
+            return 'error'
+        };
+
+        this.logState = function() {
+            var http = this._conn;
+            Ti.API.error("fail. Status: " + http.status);
+            Ti.API.error("fail. ReadyState: " + http.readyState);
+            Ti.API.error("fail. Location: " + http.location);
+            Ti.API.error("fail. Response: " + http.responseText);
+        };
+
         this.ajax = function(conf) {
             if (conf.type == 'GET' && this.length(conf.data) > 0) {
                 if (conf.url.indexOf('?') >= 0) {
@@ -49,39 +64,41 @@ var TijaxCore = function() {
             }
             var http = Ti.Network.createHTTPClient();
             this._conn = http;
+            var self = this;
             http.timeout = 10000;
+
             http.onerror = function() {
-                Ti.API.error("fail. Status: " + http.status);
-                Ti.API.error("fail. ReadyState: " + http.readyState);
-                Ti.API.error("fail. Location: " + http.location);
-                Ti.API.error("fail. Response: " + http.responseText);
+                self.logState();
                 if (typeof(conf.error) == 'function') {
-                    conf.error(http.responseData, http.status);
+                    conf.error(http, http.status, http.responseText);
                 }
                 if (typeof(conf.complete) == 'function') {
-                    conf.complete(http.responseText, http.status);
+                    conf.complete(http, 'error');
                 }
             };
+
             if (typeof(conf.onload) == 'function') {
+                //used for manual response processing (see .download() method)
                 http.onload = function() {
                     conf.onload(http);
                 }
             } else {
                 http.onload = function() {
                     if (typeof(conf.success) == 'function') {
-                        var json = eval('(' + http.responseText + ')');
-                        conf.success(json);
+                        var json = JSON.parse(http.responseText);
+                        conf.success(json, self.textStatus(http.status), http);
                     }
                     if (typeof(conf.complete) == 'function') {
-                        conf.complete(http.responseText, http.status);
+                        conf.complete(http, self.textStatus(http.status));
                     }
                     return true;
                 }
             }
+
             http.onsendstream = function(e) {
                 Ti.API.debug('Upload progress: ' + e.progress);
             };
-            Ti.API.info(http);
+
             http.open(conf.type, conf.url);
             if (typeof(conf.headers) == 'object') {
                 for (name in conf.headers) {
