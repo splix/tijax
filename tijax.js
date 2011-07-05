@@ -65,7 +65,12 @@ var TijaxCore = function() {
             var http = Ti.Network.createHTTPClient();
             this._conn = http;
             var self = this;
-            http.timeout = 10000;
+
+            if (typeof(conf.timeout) == 'number') {
+                http.timeout = conf.timeout;
+            } else {
+                http.timeout = 10000;
+            }
 
             http.onerror = function() {
                 self.logState();
