@@ -1,7 +1,7 @@
 /*!
  * Tijax - jQuery-style http wrapper for Appcelerator Titanium
  *
- * v 0.2
+ * v 0.3
  */
 var TijaxCore = function() {
         this._conn = null;
