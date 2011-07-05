@@ -3,7 +3,7 @@ Tijax - http wrapper for Appcelerator Titanium
 
 Tijax is a jQuery inspired http wrapper for Appcelerator Titanium.
 
-Version: 0.3 (alfa)
+Version: 0.3
 
 Examples
 --------
@@ -69,14 +69,14 @@ Options:
  * headers - headers for request (map of strings)
  * success - a function to be called if the request successed. Arguments:
    * `data` - map, parsed JSON response
-   * `status` - string (always 'success' for this event)
    * `http` - used Ti.Network.HTTPClient
  * error - a function to be called if the request failed. Arguments:
    * `http` - used Ti.Network.HTTPClient
-   * `status` - string (currently always 'error' for this event)
+   * `status` - request string, as string with one of following value: forbidden, notfound, notallowed, error
+   * `body` - response body, as text
  * complete - a function to be called when the request finished (after success and error callbacks are executed). Arguments:
    * `http` - used Ti.Network.HTTPClient
-   * `status` - status of request, can be: 'error', 'success'
+   * `status` - status of request, values: value: forbidden, notfound, notallowed, error or success
 
 License
 -------

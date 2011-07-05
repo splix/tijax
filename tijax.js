@@ -41,6 +41,15 @@ var TijaxCore = function() {
             if (statusCode == 200) {
                 return 'success'
             }
+            if (statusCode == 403) {
+                return 'forbidden'
+            }
+            if (statusCode == 404) {
+                return 'notfound'
+            }
+            if (statusCode == 405) {
+                return 'notallowed'
+            }
             return 'error'
         };
 
@@ -73,8 +82,9 @@ var TijaxCore = function() {
                     if (http.responseText != null && http.responseText.length > 0) {
                         json = eval('(' + http.responseText + ')');
                     }
-                    conf.success(json, self.textStatus(http.status), http);
-                    conf.complete(http, self.textStatus(http.status));
+                    //var status = self.textStatus(http.status);
+                    conf.success(json, http);
+                    conf.complete(http, 'success');
                 }
             } else {
                 conf._onload = conf.onload;
@@ -105,8 +115,9 @@ var TijaxCore = function() {
 
             http.timeout = conf.timeout;
             http.onerror = function() {
-                conf.error(http, 'error', http.responseText);
-                conf.complete(http, 'error');
+                var status = self.textStatus(http.status);
+                conf.error(http, status, http.responseText);
+                conf.complete(http, status);
             };
             http.onload = conf.onload;
             http.onsendstream = conf.onsendstream;
