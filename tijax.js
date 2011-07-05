@@ -105,7 +105,7 @@ var TijaxCore = function() {
 
             http.timeout = conf.timeout;
             http.onerror = function() {
-                conf.error(http, http.status, http.responseText);
+                conf.error(http, 'error', http.responseText);
                 conf.complete(http, 'error');
             };
             http.onload = conf.onload;
