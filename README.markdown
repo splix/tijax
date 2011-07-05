@@ -3,7 +3,7 @@ Tijax - http wrapper for Appcelerator Titanium
 
 Tijax is a jQuery inspired http wrapper for Appcelerator Titanium.
 
-Version: 0.2 (alfa)
+Version: 0.3 (alfa)
 
 Examples
 --------
@@ -26,10 +26,10 @@ Tijax.get({
         Ti.API.info('Got it ' + JSON.stringify(data));
     },
     error: function(http, status) {
-        error('Failed');
+        Ti.API.error('Failed');
     },
     complete: function(http, status) {
-        info('Complete');
+        Ti.API.info('Complete');
     }
 });
 
