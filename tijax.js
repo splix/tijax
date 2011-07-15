@@ -101,6 +101,7 @@ var TijaxCore = function() {
         };
 
         this.ajax = function(conf) {
+            var self = this;
             conf = this.configure(conf);
             if (conf.type == 'GET' && this.length(conf.data) > 0) {
                 if (conf.url.indexOf('?') >= 0) {
